@@ -9,7 +9,7 @@
 module scaler_SFFT #(
     parameter BITWIDTH = 8,
     parameter BINPUT = 2,
-    parameter NUMINPUTS = 2,
+    parameter NUMINPUTS = 8,
     parameter LOG2N = $clog2(NUMINPUTS)
 ) (
     input wire iClk, iRstN, iEn, loadW, iClr,
