@@ -68,7 +68,7 @@ module uMUL_bi #(
     ) u_sobolRandom (
         .iClk(iClk),
         .iRstN(iRstN),
-        .iEn(1),
+        .iEn(iEn),
         .iClr(iClr),
         .sobolseq(sobolseqRan)
     );
