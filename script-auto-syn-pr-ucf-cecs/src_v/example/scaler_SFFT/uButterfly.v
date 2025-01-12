@@ -5,8 +5,7 @@
 `define uButterfly
 
 `include "uMUL_bi.v"
-`include "uSADD.v"
-`include "uSSUB.v"
+`include "uNSADD.v"
 
 module uButterfly #(
     parameter BITWIDTH = 8,
@@ -28,16 +27,7 @@ module uButterfly #(
     wire scalerImg0;
     wire real_eq;
     wire img_eq;
-    reg biZero;
 
-    always@(posedge iClk or negedge iRstN) begin
-        if(~iRstN) begin 
-            biZero <= 0;
-        end else begin
-            biZero <= ~biZero;
-        end
-    end
-    
     //these account for the multiplication of input 1 with w
     uMUL_bi #(
         .BITWIDTH(BITWIDTH)
@@ -95,17 +85,17 @@ module uButterfly #(
 
     //creates parts to be added and subtracted in butterfly
 
-    uSSUB #(
+    uNSADD #(
         .BINPUT(BINPUT)
     ) u_uSSUB_realeq (
         .iClk(iClk),
         .iRstN(iRstN),
         .iA(eq_Real1_x_wReal),
-        .iB(eq_Img1_x_wImg),
+        .iB(~eq_Img1_x_wImg),
         .oC(real_eq)
     );
 
-    uSADD #(
+    uNSADD #(
         .BINPUT(BINPUT)
     ) u_uSADD_imgeq (
         .iClk(iClk),
@@ -115,69 +105,47 @@ module uButterfly #(
         .oC(img_eq) 
     );
 
-    //scales first input to match with the other scaled equations
-    uSADD #(
+    //used to find final outputs
+
+    uNSADD #(
         .BINPUT(BINPUT)
-    ) u_uSADD_scalerReal (
+    ) u_uNSADD_oReal0 (
         .iClk(iClk),
         .iRstN(iRstN),
         .iA(iReal0),
-        .iB(biZero),
-        .oC(scalerReal0)
-    );
-
-    uSADD #(
-        .BINPUT(BINPUT)
-    ) uSADD_scalerImg (
-        .iClk(iClk),
-        .iRstN(iRstN),
-        .iA(iImg0),
-        .iB(biZero),
-        .oC(scalerImg0)
-    );
-
-    //used to find final outputs
-
-    uSADD #(
-        .BINPUT(BINPUT)
-    ) u_uSADD_oReal0 (
-        .iClk(iClk),
-        .iRstN(iRstN),
-        .iA(scalerReal0),
         .iB(real_eq),
         .oC(oReal0) 
     );
 
-    uSADD #(
+    uNSADD #(
         .BINPUT(BINPUT)
-    ) u_uSADD_oImg0 (
+    ) u_uNSADD_oImg0 (
         .iClk(iClk),
         .iRstN(iRstN),
-        .iA(scalerImg0),
+        .iA(iImg0),
         .iB(img_eq),
         .oC(oImg0) 
     );
 
-    uSSUB #(
+    uNSADD #(
         .BINPUT(BINPUT)
-    ) u_uSSUB_oReal1 (
+    ) u_uNSSUB_oReal1 (
         .iClk(iClk),
         .iRstN(iRstN),
-        .iA(scalerReal0),
-        .iB(real_eq),
+        .iA(iReal0),
+        .iB(~real_eq),
         .oC(oReal1) 
     );
 
-    uSSUB #(
+    uNSADD #(
         .BINPUT(BINPUT)
-    ) u_uSSUB_oImg1 (
+    ) u_uNSSUB_oImg1 (
         .iClk(iClk),
         .iRstN(iRstN),
-        .iA(scalerImg0),
-        .iB(img_eq),
+        .iA(iImg0),
+        .iB(~img_eq),
         .oC(oImg1) 
     );
-    
 endmodule
 
 `endif
